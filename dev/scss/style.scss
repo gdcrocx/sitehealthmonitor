@@ -1,0 +1,39 @@
+$primary: #006699;
+
+h2 {
+	color: $primary;
+}
+
+table, thead, tbody, th, tr, td {
+	padding: 0;
+	border: 1px solid grey;
+}
+
+thead, tbody, th, tr, td {
+	padding: 0 0.5rem;
+}
+
+.status-failure input[type="checkbox"] {
+	color: red;
+	border: 1px solid red;
+	background-color: red;
+	padding: 1rem;
+}
+
+.status-success input[type="checkbox"] {
+	color: green;
+	border: 1px solid green;
+	background-color: green;
+	padding: 1rem;
+}
+
+input[type="checkbox"] {	
+	-webkit-appearance: inherit;
+}
+
+form input, form button {
+	padding: .25rem;
+	margin: .25rem;
+	border-radius: .15rem;
+	border: 1px solid grey;
+}
