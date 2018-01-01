@@ -2,28 +2,47 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import classnames from 'classnames';
-import { checkStatus } from '../actions/checkStatus'
+import isEmpty from 'lodash/isEmpty';
 
-/*
- * We need "if(!this.props.user)" because we set state to null by default
- * */
+import { checkStatus, deleteMonitor } from '../actions/monitors';
 
 class Monitors extends Component {
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            id: '',
+            name: '',
+            url: '',
+            isActive: false,
+            isLoading: false,
+            errors: {}            
+        }        
+        this.onClick = this.onClick.bind(this);
+    }
+
+    onClick(e) { 
+        e.preventDefault();
+        this.setState({ isLoading: true });
+        this.props.deleteMonitor({id: e.target.name})
+        this.setState({ isLoading: false });                
+    }
+
     renderList() {        
-        console.log("Monitors Data - " + JSON.stringify(this.props.monitors));
-        // console.dir(this.props.monitors);
         const errors = {};
-        return this.props.monitors.map((monitor) => {
-            console.log("Monitor Info - " + JSON.stringify(monitor));            
-            return (
-                <tr key={monitor.id}>
-                    <td>{monitor.name}</td>
-                    <td>{monitor.url}</td>
-                    <td className={classnames({ 'status-success': monitor.isActive},  {'status-failure': !monitor.isActive})}><input type="checkbox" checked={monitor.isActive} readOnly/></td>
-                </tr>
-            );
-        });
+        if (!isEmpty(this.props.monitors)) {
+            const monitorTable = this.props.monitors.monitorList.map((monitor) => {
+                return (
+                    <tr key={monitor.id}>
+                        <td>{monitor.name}</td>
+                        <td>{monitor.url}</td>
+                        <td className={ classnames({ 'status-success': monitor.isActive }, { 'status-failure': !monitor.isActive }) }><input type="checkbox" checked={monitor.isActive} readOnly /></td>
+                        <td><button name={monitor.id} className="button-danger" onClick={this.onClick} disabled={this.state.isLoading}>Remove</button></td>
+                    </tr>
+                );
+            });
+            return monitorTable
+        }
     }
 
     render() {
@@ -36,6 +55,7 @@ class Monitors extends Component {
                             <th>Module</th>
                             <th>URL</th>
                             <th>Status</th>
+                            <th>Operations</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,17 +68,18 @@ class Monitors extends Component {
 }
 
 Monitors.propTypes = {
-    checkStatus: React.PropTypes.func.isRequired
+    checkStatus: React.PropTypes.func.isRequired,
+    deleteMonitor: React.PropTypes.func.isRequired
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state) {    
     return {
         monitors: state.monitors
     };
 }
 
 function matchDispatchToProps(dispatch) {
-    return bindActionCreators({ checkStatus: checkStatus }, dispatch);
+    return bindActionCreators({ checkStatus: checkStatus, deleteMonitor: deleteMonitor }, dispatch);
 }
 
 export default connect(mapStateToProps, matchDispatchToProps)(Monitors);

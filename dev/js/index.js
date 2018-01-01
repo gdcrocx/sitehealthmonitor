@@ -18,9 +18,13 @@ const store = createStore(
     )
 );
 
+// store.subscribe(() => {
+//     console.log("Redux Store Changed, New State: " + JSON.stringify(store.getState()));
+// })
+
 ReactDOM.render(
     <Provider store={store}>
         <App />
     </Provider>,
-    document.getElementById('root')
+    document.getElementById('app')
 );

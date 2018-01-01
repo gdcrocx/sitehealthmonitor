@@ -1,6 +1,5 @@
-import {combineReducers} from 'redux';
-import {initDefaultMonitors} from './reducer-monitors';
-// import ActiveUserReducer from './reducer-active-user';
+import { combineReducers } from 'redux';
+import { modifyMonitor } from './reducer-monitors';
 
 /*
  * We combine all reducers into a single object before updated data is dispatched (sent) to store
@@ -8,7 +7,7 @@ import {initDefaultMonitors} from './reducer-monitors';
  * */
 
 const allReducers = combineReducers({
-    monitors: initDefaultMonitors
+    monitors: modifyMonitor
 });
 
 export default allReducers
