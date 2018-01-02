@@ -16,19 +16,19 @@ class Monitors extends Component {
             url: '',
             isActive: false,
             isLoading: false,
-            errors: {}            
-        }        
+            errors: {}
+        }
         this.onClick = this.onClick.bind(this);
     }
 
-    onClick(e) { 
+    onClick(e) {
         e.preventDefault();
         this.setState({ isLoading: true });
-        this.props.deleteMonitor({id: e.target.name})
-        this.setState({ isLoading: false });                
+        this.props.deleteMonitor({ id: e.target.name })
+        this.setState({ isLoading: false });
     }
 
-    renderList() {        
+    renderList() {
         const errors = {};
         if (!isEmpty(this.props.monitors)) {
             const monitorTable = this.props.monitors.monitorList.map((monitor) => {
@@ -36,7 +36,7 @@ class Monitors extends Component {
                     <tr key={monitor.id}>
                         <td>{monitor.name}</td>
                         <td>{monitor.url}</td>
-                        <td className={ classnames({ 'status-success': monitor.isActive }, { 'status-failure': !monitor.isActive }) }><input type="checkbox" checked={monitor.isActive} readOnly /></td>
+                        <td className={classnames({ 'status-success': monitor.isActive }, { 'status-failure': !monitor.isActive })}><input type="checkbox" checked={monitor.isActive} readOnly /></td>
                         <td><button name={monitor.id} className="button-danger" onClick={this.onClick} disabled={this.state.isLoading}>Remove</button></td>
                     </tr>
                 );
@@ -72,7 +72,7 @@ Monitors.propTypes = {
     deleteMonitor: React.PropTypes.func.isRequired
 }
 
-function mapStateToProps(state) {    
+function mapStateToProps(state) {
     return {
         monitors: state.monitors
     };

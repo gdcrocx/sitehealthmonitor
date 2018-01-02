@@ -3,7 +3,7 @@ import isEmpty from 'lodash/isEmpty';
 // var https = require('https');
 import https from 'https';
 
-import { MONITOR_ADDED, MONITOR_DELETED, STATUS_SUCCESS, LOG_ERROR } from './types';
+import { MONITOR_ADDED, MONITOR_DELETED, MONITOR_STATUS, LOG_ERROR } from './types';
 
 export function addMonitor(newMonitor) {
     // console.log("Action: You added a new monitor: " + JSON.stringify(newMonitor));
@@ -36,7 +36,7 @@ export function validateInput(data) {
         if (!Validator.isURL(data.url)) {
             errors.url = 'The URL is invalid';
         }
-    }       
+    }
     // console.log("Validation Errors : " + JSON.stringify(errors));
     return {
         errors,
@@ -47,40 +47,45 @@ export function validateInput(data) {
 export function logError(error) {
     return {
         type: LOG_ERROR,
-        payload: error        
+        payload: error
     }
 }
 
-export function checkStatus(monitorUrl) {    
+export function checkStatus(monitor) {
 
-    // console.log("Action : Status Check URL - " + JSON.stringify(monitorUrl));
-    // let url = monitorUrl;
-    // let response = '';
-    // https.get(url, function(res) {
-    //     console.log("Action : " + url + " - statusCode : " + res.statusCode); // <======= Here's the status code
-    //     // console.log("headers: ", res.headers);
+    console.log("Action : Status Check URL - " + JSON.stringify(monitor));
+    let url = monitor.monitor.url;
+    let monitorStatus = {
+        isActive: false
+    };
+    let response = '';
+    try {
+        https.get(url, function (res) {
+            console.log("Action : " + url + " - statusCode : " + res.statusCode); // <======= Here's the status code
+            // console.log("headers: ", res.headers);
 
-    //     res.on('data', function(d) {
-    //         console.log("Action : " + url + " - Success with link")
-    //         response = "SUCCESS"
-    //         console.log("Action : Response - " + JSON.stringify(response))
-    //         return {
-    //             type: STATUS_SUCCESS,
-    //             text: "SUCCESS"
-    //         }
-    //     });
+            res.on('data', function (data) {
+                console.log("Action : " + url + " - Success with link - " + data)
+                response = "SUCCESS"
+                console.log("Action : Response - " + JSON.stringify(response))  
+                monitorStatus = { ...monitorStatus, isActive: true }                  
+            });
 
-    // }).on('error', function(e) {
-    //     console.error(e);
-    //     response = "FAILURE";
-    //     console.log("Action : Response - " + JSON.stringify(response))
-    //     return {
-    //         type: STATUS_FAILURE,
-    //         text: "FAILURE"
-    //     }
-    // });
+        }).on('error', function (errors) {
+            console.error(errors);
+            response = "FAILURE";
+            console.log("Action : Response - " + JSON.stringify(response))    
+            monitorStatus = { ...monitorStatus, isActive: false }           
+        });
+    }
+    catch (errors) {
+        return {
+            type: LOG_ERROR,
+            payload: errors
+        }
+    }
     return {
-        type: STATUS_SUCCESS,
-        payload: monitorUrl
+        type: MONITOR_STATUS,
+        payload: monitorStatus
     }
 };

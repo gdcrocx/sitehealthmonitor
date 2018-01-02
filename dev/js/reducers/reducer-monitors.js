@@ -1,7 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 import findIndex from 'lodash/findIndex';
 
-import { MONITOR_ADDED, MONITOR_DELETED, STATUS_SUCCESS, LOG_ERROR } from '../actions/types';
+import { MONITOR_ADDED, MONITOR_DELETED, MONITOR_STATUS, LOG_ERROR } from '../actions/types';
 
 exports.modifyMonitor = function (state = null, action) {
     // console.log("Monitor Reducer State : " + JSON.stringify(state));
@@ -63,15 +63,14 @@ exports.modifyMonitor = function (state = null, action) {
                 return { ...state, monitorList: newMonitorList };
             }
             break;
-        case STATUS_SUCCESS:
-            console.log('STATUS_SUCCESS');
-            // console.log("Reducer State: " + JSON.stringify(state));        
-            // console.log("Reducer Action Payload: " + JSON.stringify(action.payload));
-            // state = {...state, isActive: action.isActive};
-            // return state;
-            break;
+        case MONITOR_STATUS:
+            console.log('MONITOR_STATUS');
+            console.log("Reducer State: " + JSON.stringify(state));        
+            console.log("Reducer Action Payload: " + JSON.stringify(action.payload));
+            return {...state, isActive: action.payload.isActive};            
+            break;       
         case LOG_ERROR:
-            return { ...state, errors: action.payload.errors }; 
+            return { ...state, isActive: action.payload.isActive }; 
             break;
         default:
             return state;

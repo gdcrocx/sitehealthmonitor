@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import TextFieldGroup from '../components/TextFieldGroup';
-import { addMonitor, validateInput, logError } from '../actions/monitors';
 import shortid from 'shortid';
 import isEmpty from 'lodash/isEmpty';
+
+import TextFieldGroup from '../components/TextFieldGroup';
+import { addMonitor, validateInput, logError, checkStatus } from '../actions/monitors';
 
 class MonitorInput extends Component {
     constructor(props) {
@@ -17,7 +18,8 @@ class MonitorInput extends Component {
             errors: {}
         }
         this.onChange = this.onChange.bind(this);
-        this.onSubmit = this.onSubmit.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);        
+        this.reset = this.reset.bind(this);
     }
 
     onChange(e) {
@@ -51,11 +53,13 @@ class MonitorInput extends Component {
                     }
                     return isValid;
                 }
-                if (isValid()) {
+                if (isValid()) {                    
                     // For Redux State
                     this.props.addMonitor({ errors: {}, monitor: { id: shortid.generate(), isActive: true, url: this.state.newMonitorUrl, name: this.state.newMonitorName } });
                     // For React State
                     this.setState({ errors: {}, isLoading: true, monitor: { isActive: true, newMonitorUrl: this.state.newMonitorUrl, newMonitorName: this.state.newMonitorName } });                    
+                    // Check Status call to fetch URL isActive status
+                    this.props.checkStatus({ monitor: { url: this.state.newMonitorUrl } });
                 }
                 else {                                        
                     this.setState({ errors: "Duplicate entry. Skipping.." });                    
@@ -67,9 +71,15 @@ class MonitorInput extends Component {
                 this.props.addMonitor({ errors: {}, monitor: { id: shortid.generate(), isActive: true, url: this.state.newMonitorUrl, name: this.state.newMonitorName } });
                 // For React State
                 this.setState({ errors: {}, isLoading: true, monitor: { isActive: true, newMonitorUrl: this.state.newMonitorUrl, newMonitorName: this.state.newMonitorName } });
+                // Check Status call to fetch URL isActive status
+                this.props.checkStatus({ monitor: { url: this.state.newMonitorUrl } });
             }
         }
         this.setState({ isLoading: false });
+    }
+
+    reset(e) {
+        this.setState({ errors: {}, isLoading: false, isActive: false, newMonitorUrl: '', newMonitorName: '' })
     }
 
     render() {
@@ -95,7 +105,7 @@ class MonitorInput extends Component {
                 <input type="text" name="newMonitorUrl" value={this.state.newMonitorUrl} onChange={this.onChange} />
                 <br />
                 <button type="submit" className="button-primary" disabled={this.state.isLoading}>Add New Monitor</button>
-                <button type="reset" className="button-danger">Cancel</button>
+                <button type="reset" className="button-danger" onClick={this.reset}>Reset</button>
             </form>
         );
     }
@@ -103,7 +113,8 @@ class MonitorInput extends Component {
 
 MonitorInput.propTypes = {
     addMonitor: React.PropTypes.func.isRequired,
-    logError: React.PropTypes.func.isRequired
+    logError: React.PropTypes.func.isRequired,
+    checkStatus: React.PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
@@ -113,7 +124,7 @@ function mapStateToProps(state) {
 }
 
 function matchDispatchToProps(dispatch) {
-    return bindActionCreators({ addMonitor: addMonitor, logError: logError }, dispatch);
+    return bindActionCreators({ addMonitor: addMonitor, logError: logError, checkStatus: checkStatus }, dispatch);
 }
 
 export default connect(mapStateToProps, matchDispatchToProps)(MonitorInput);

@@ -12,7 +12,7 @@ const App = () => (
         <UserDetails /> */}
         <h2>Site Health Monitor</h2>
         <MonitorInput/>
-        <Monitors/>
+        <Monitors/>        
     </div>
 );
 
