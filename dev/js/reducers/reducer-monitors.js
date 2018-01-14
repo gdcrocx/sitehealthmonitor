@@ -74,24 +74,24 @@ exports.modifyMonitor = function (state = null, action) {
         case MONITOR_STATUS:
             // console.log('MONITOR_STATUS');
             // console.log("Reducer State: " + JSON.stringify(state));
-            // console.log("Reducer Action Payload: " + JSON.stringify(action.payload));
+            console.log("Reducer Action Payload: " + JSON.stringify(action.payload));
             if (!isEmpty(action.payload.errors)) {
                 // console.log("Invalid Error caught, piping errors to Redux - " + JSON.stringify(action.payload.errors));
                 return { ...state, errors: action.payload.errors };
-            }
-            if (!isEmpty(JSON.stringify(action.payload.monitor.isActive)) && !isEmpty(action.payload.monitor.id)) {
+            }        
+            if (!isEmpty(JSON.stringify(action.payload.monitorList[0].isActive)) && !isEmpty(action.payload.monitorList[0].id)) {
                 // console.log("Success! Piping valid input to Redux - " + JSON.stringify(action.payload));             
                 let tempMonitorList = [ ...state.monitorList ];
                 let newMonitorList = [ ...state.monitorList ];                                    
                 newMonitorList = tempMonitorList.map( (item, index) => {                    
-                    if(item.id !== action.payload.monitor.id) {
+                    if(item.id !== action.payload.monitorList[0].id) {
                         // This isn't the item we care about - keep it as-is
                         return item;
                     }                
                     // Otherwise, this is the one we want - return an updated value
                     return {
                         ...item,
-                        ...action.payload.monitor
+                        ...action.payload.monitorList[0]
                     };    
                 });
                 return { ...state, monitorList: newMonitorList };                

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import classnames from 'classnames';
 import isEmpty from 'lodash/isEmpty';
 
-import { checkStatus, deleteMonitor } from '../actions/monitors';
+import { checkStatus, taskScheduler, deleteMonitor } from '../actions/monitors';
 
 class Monitors extends Component {
 
@@ -35,7 +35,7 @@ class Monitors extends Component {
                 return (
                     <tr key={monitor.id}>
                         <td>{monitor.name}</td>
-                        <td>{monitor.url}</td>
+                        <td><a href={monitor.url} target="_blank">{monitor.url}</a></td>
                         <td className={classnames({ 'status-success': monitor.isActive }, { 'status-failure': !monitor.isActive })}><input type="checkbox" checked={monitor.isActive} readOnly /></td>
                         <td><button name={monitor.id} className="button-danger" onClick={this.onClick} disabled={this.state.isLoading}>Remove</button></td>
                     </tr>
@@ -62,13 +62,25 @@ class Monitors extends Component {
                         {this.renderList()}
                     </tbody>
                 </table>
-            </div>
+                {this.refreshStatus()}
+            </div>            
         );
+    }
+
+    refreshStatus() {
+        if (!isEmpty(this.props.monitors)) {
+            let monitors = this.props.monitors;
+            console.log("Refreshing Stats - " + JSON.stringify(monitors));
+            setInterval(function(){
+                taskScheduler(monitors)
+            }, 10000);
+        }        
     }
 }
 
 Monitors.propTypes = {
     checkStatus: React.PropTypes.func.isRequired,
+    taskScheduler: React.PropTypes.func.isRequired,
     deleteMonitor: React.PropTypes.func.isRequired
 }
 
@@ -79,7 +91,7 @@ function mapStateToProps(state) {
 }
 
 function matchDispatchToProps(dispatch) {
-    return bindActionCreators({ checkStatus: checkStatus, deleteMonitor: deleteMonitor }, dispatch);
+    return bindActionCreators({ checkStatus: checkStatus, deleteMonitor: deleteMonitor, taskScheduler: taskScheduler }, dispatch);
 }
 
 export default connect(mapStateToProps, matchDispatchToProps)(Monitors);

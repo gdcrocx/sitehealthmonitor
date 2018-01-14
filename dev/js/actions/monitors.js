@@ -41,74 +41,106 @@ export function validateInput(data) {
         errors,
         isValid: isEmpty(errors)
     }
-}
+};
 
 export function logError(errors) {
     return {
         type: LOG_ERROR,
         payload: errors
     }
-}
+};
 
 export function checkStatus(monitor) {
     // console.log("Incoming Object : " + JSON.stringify(monitor));
     // {"errors":{},"monitor":{"id":"ryTppFRmf","isActive":false,"url":"http://127.0.0.1/","name":"DEMO"}}
-    let url = monitor.monitor.url;
-    return (dispatch) => {
-        try {
-            var options = {
-                url: url,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Request-Method': '*',
-                    'Access-Control-Allow-Methods': 'GET',
-                    'Access-Control-Allow-Headers': '*'
-                }
-            };
+    // console.log("Incoming Monitor Object - " + JSON.stringify(monitor));
+    for (let index = 0; index < monitor.monitorList.length; index++) {
+        let monitorStatusObj = { 
+            monitorList: [{
+                id: monitor.monitorList[index].id,
+                url: monitor.monitorList[index].url,
+                isActive: monitor.monitorList[index].isActive,
+                name: monitor.monitorList[index].name
+            }],
+            errors: {}
+        }
+        return (dispatch) => {
+            try {
+                var options = {
+                    url: monitorStatusObj.url,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Request-Method': '*',
+                        'Access-Control-Allow-Methods': 'GET',
+                        'Access-Control-Allow-Headers': '*'
+                    }
+                };
 
-            https.get(options, function (res) {
-                // console.log("Action : " + url + " - statusCode : " + res.statusCode);
-                res.on('data', function (data) {
-                    if (res.statusCode !== 200) {
-                        console.error("Err: " + res.statusMessage);
-                        monitor = { ...monitor, errors: { status: JSON.stringify(url + ": Err - " + res.statusMessage) } };
-                        // monitorObj = { ...monitorObj, isActive: false, id: monitor.monitor.id, url: url, name: monitor.monitor.name, err: JSON.stringify(url + ": Err - " + res.statusMessage) };
-                        // console.log("Action returns: " + JSON.stringify(monitor));
-                        dispatch({
-                            type: MONITOR_STATUS,
-                            payload: monitor
-                        })
-                    }
-                    else {
-                        // console.log("Success! - " + JSON.stringify(res.statusCode) + " " + JSON.stringify(res.statusMessage));
-                        let monitorObj = { ...monitor.monitor, isActive: true };
-                        monitor = { ...monitor, monitor: monitorObj };
-                        // console.log("Action returns: " + JSON.stringify(monitor));
-                        dispatch({
-                            type: MONITOR_STATUS,
-                            payload: monitor
-                        })
-                    }
+                https.get(options, function (res) {
+                    // console.log("Action : " + url + " - statusCode : " + res.statusCode);
+                    res.on('data', function (data) {
+                        if (res.statusCode !== 200) {
+                            console.error("Err: " + res.statusMessage);
+                            monitor = { ...monitorStatusObj, errors: { status: JSON.stringify(url + ": Err - " + res.statusMessage) } };
+                            console.log("Action returns !200: " + JSON.stringify(monitor));
+                            dispatch({
+                                type: MONITOR_STATUS,
+                                payload: monitor
+                            })
+                        }
+                        else {
+                            // console.log("Success! - " + JSON.stringify(res.statusCode) + " " + JSON.stringify(res.statusMessage));
+                            let monitorObj = { 
+                                id: monitorStatusObj.monitorList[0].id, 
+                                isActive: true,
+                                name: monitorStatusObj.monitorList[0].name, 
+                                url: monitorStatusObj.monitorList[0].url
+                            };
+                            monitor = { 
+                                ...monitorStatusObj, 
+                                monitorList: [ 
+                                    ...monitorStatusObj.monitorList[0], 
+                                    monitorObj
+                                ]
+                            }
+                            console.log("Action returns 200: " + JSON.stringify(monitor));
+                            dispatch({
+                                type: MONITOR_STATUS,
+                                payload: monitor
+                            })
+                        }
+                    });
+                }).on('error', function (errors) {
+                    console.error("Err: " + errors);
+                    monitor = { ...monitorStatusObj, errors: { status: JSON.stringify("RequestError: " + url + ": " + errors) } };
+                    // console.log("Action returns: " + JSON.stringify(monitor));
+                    dispatch({
+                        type: LOG_ERROR,
+                        payload: monitor
+                    })
                 });
-            }).on('error', function (errors) {
-                console.error("Err: " + errors);
-                monitor = { ...monitor, errors: { status: JSON.stringify("RequestError: " + url + ": " + errors) } };
-                // console.log("Action returns: " + JSON.stringify(monitor));
+            }
+            catch (errors) {
+                console.error(errors);
+                monitor = { ...monitor, errors: { errors } };
+                // console.log("Action returns: (errors) - " + JSON.stringify(monitor));
                 dispatch({
                     type: LOG_ERROR,
                     payload: monitor
                 })
-            });
-        }
-        catch (errors) {
-            console.error(errors);
-            monitor = { ...monitor, errors: { errors } };
-            // console.log("Action returns: (errors) - " + JSON.stringify(monitor));
-            dispatch({
-                type: LOG_ERROR,
-                payload: monitor
-            })
+            }
         }
     }
 };
+
+export function taskScheduler(monitors) {
+
+    console.log("Monitors Object - " + JSON.stringify(monitors) + " - " + monitors.monitorList.length);
+    if (!isEmpty(monitors)) {
+        if (monitors.monitorList.length > 0) {
+            console.log("Monitor List - " + JSON.stringify(monitors.monitorList));
+            checkStatus(monitors);
+        }
+    }
+}
