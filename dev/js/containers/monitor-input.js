@@ -53,26 +53,29 @@ class MonitorInput extends Component {
                     }
                     return isValid;
                 }
-                if (isValid()) {                    
+                if (isValid()) {       
+                    let randomShortId = shortid.generate();                           
                     // For Redux State
-                    this.props.addMonitor({ errors: {}, monitor: { id: shortid.generate(), isActive: true, url: this.state.newMonitorUrl, name: this.state.newMonitorName } });
+                    this.props.addMonitor({ errors: {}, monitor: { id: randomShortId, isActive: false, url: this.state.newMonitorUrl, name: this.state.newMonitorName } });
                     // For React State
                     this.setState({ errors: {}, isLoading: true, monitor: { isActive: true, newMonitorUrl: this.state.newMonitorUrl, newMonitorName: this.state.newMonitorName } });                    
+                    
                     // Check Status call to fetch URL isActive status
-                    this.props.checkStatus({ monitor: { url: this.state.newMonitorUrl } });
+                    this.props.checkStatus({ errors: {}, monitor: { id: randomShortId, url: this.state.newMonitorUrl } });
                 }
                 else {                                        
                     this.setState({ errors: "Duplicate entry. Skipping.." });                    
                     this.props.logError({ errors: { url: "Duplicate entry. Skipping.." } });
                 }
             }
-            else {                
+            else {            
+                let randomShortId = shortid.generate();  
                 // For Redux State
-                this.props.addMonitor({ errors: {}, monitor: { id: shortid.generate(), isActive: true, url: this.state.newMonitorUrl, name: this.state.newMonitorName } });
+                this.props.addMonitor({ errors: {}, monitor: { id: randomShortId, isActive: false, url: this.state.newMonitorUrl, name: this.state.newMonitorName } });
                 // For React State
                 this.setState({ errors: {}, isLoading: true, monitor: { isActive: true, newMonitorUrl: this.state.newMonitorUrl, newMonitorName: this.state.newMonitorName } });
                 // Check Status call to fetch URL isActive status
-                this.props.checkStatus({ monitor: { url: this.state.newMonitorUrl } });
+                this.props.checkStatus({ errors: {}, monitor: { id: randomShortId, isActive: false, url: this.state.newMonitorUrl, name: this.state.newMonitorName } });
             }
         }
         this.setState({ isLoading: false });

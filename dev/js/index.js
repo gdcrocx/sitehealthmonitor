@@ -10,9 +10,10 @@ import allReducers from './reducers';
 import App from './components/app';
 
 const logger = createLogger();
+
 const store = createStore(
     allReducers,
-    compose(
+    compose(    
         applyMiddleware(thunk, promise, logger),
         window.devToolsExtension ? window.devToolsExtension() : f => f
     )

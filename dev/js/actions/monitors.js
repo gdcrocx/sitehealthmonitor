@@ -1,6 +1,5 @@
 import Validator from 'validator';
 import isEmpty from 'lodash/isEmpty';
-// var https = require('https');
 import https from 'https';
 
 import { MONITOR_ADDED, MONITOR_DELETED, MONITOR_STATUS, LOG_ERROR } from './types';
@@ -44,48 +43,72 @@ export function validateInput(data) {
     }
 }
 
-export function logError(error) {
+export function logError(errors) {
     return {
         type: LOG_ERROR,
-        payload: error
+        payload: errors
     }
 }
 
 export function checkStatus(monitor) {
-
-    console.log("Action : Status Check URL - " + JSON.stringify(monitor));
+    // console.log("Incoming Object : " + JSON.stringify(monitor));
+    // {"errors":{},"monitor":{"id":"ryTppFRmf","isActive":false,"url":"http://127.0.0.1/","name":"DEMO"}}
     let url = monitor.monitor.url;
-    let monitorStatus = {
-        isActive: false
-    };
-    let response = '';
-    try {
-        https.get(url, function (res) {
-            console.log("Action : " + url + " - statusCode : " + res.statusCode); // <======= Here's the status code
-            // console.log("headers: ", res.headers);
+    return (dispatch) => {
+        try {
+            var options = {
+                url: url,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Request-Method': '*',
+                    'Access-Control-Allow-Methods': 'GET',
+                    'Access-Control-Allow-Headers': '*'
+                }
+            };
 
-            res.on('data', function (data) {
-                console.log("Action : " + url + " - Success with link - " + data)
-                response = "SUCCESS"
-                console.log("Action : Response - " + JSON.stringify(response))  
-                monitorStatus = { ...monitorStatus, isActive: true }                  
+            https.get(options, function (res) {
+                // console.log("Action : " + url + " - statusCode : " + res.statusCode);
+                res.on('data', function (data) {
+                    if (res.statusCode !== 200) {
+                        console.error("Err: " + res.statusMessage);
+                        monitor = { ...monitor, errors: { status: JSON.stringify(url + ": Err - " + res.statusMessage) } };
+                        // monitorObj = { ...monitorObj, isActive: false, id: monitor.monitor.id, url: url, name: monitor.monitor.name, err: JSON.stringify(url + ": Err - " + res.statusMessage) };
+                        // console.log("Action returns: " + JSON.stringify(monitor));
+                        dispatch({
+                            type: MONITOR_STATUS,
+                            payload: monitor
+                        })
+                    }
+                    else {
+                        // console.log("Success! - " + JSON.stringify(res.statusCode) + " " + JSON.stringify(res.statusMessage));
+                        let monitorObj = { ...monitor.monitor, isActive: true };
+                        monitor = { ...monitor, monitor: monitorObj };
+                        // console.log("Action returns: " + JSON.stringify(monitor));
+                        dispatch({
+                            type: MONITOR_STATUS,
+                            payload: monitor
+                        })
+                    }
+                });
+            }).on('error', function (errors) {
+                console.error("Err: " + errors);
+                monitor = { ...monitor, errors: { status: JSON.stringify("RequestError: " + url + ": " + errors) } };
+                // console.log("Action returns: " + JSON.stringify(monitor));
+                dispatch({
+                    type: LOG_ERROR,
+                    payload: monitor
+                })
             });
-
-        }).on('error', function (errors) {
-            console.error(errors);
-            response = "FAILURE";
-            console.log("Action : Response - " + JSON.stringify(response))    
-            monitorStatus = { ...monitorStatus, isActive: false }           
-        });
-    }
-    catch (errors) {
-        return {
-            type: LOG_ERROR,
-            payload: errors
         }
-    }
-    return {
-        type: MONITOR_STATUS,
-        payload: monitorStatus
+        catch (errors) {
+            console.error(errors);
+            monitor = { ...monitor, errors: { errors } };
+            // console.log("Action returns: (errors) - " + JSON.stringify(monitor));
+            dispatch({
+                type: LOG_ERROR,
+                payload: monitor
+            })
+        }
     }
 };
