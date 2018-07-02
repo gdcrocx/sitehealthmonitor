@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import classnames from 'classnames';
 import isEmpty from 'lodash/isEmpty';
 
-import { checkStatus, taskScheduler, deleteMonitor } from '../actions/monitors';
+import { checkStatus, deleteMonitor } from '../actions/monitors'; //taskScheduler
 
 class Monitors extends Component {
 
@@ -67,20 +67,20 @@ class Monitors extends Component {
         );
     }
 
-    refreshStatus() {
-        if (!isEmpty(this.props.monitors)) {
-            let monitors = this.props.monitors;
-            console.log("Refreshing Stats - " + JSON.stringify(monitors));
-            setInterval(function(){
-                taskScheduler(monitors)
-            }, 10000);
-        }        
-    }
+    // refreshStatus() {
+    //     if (!isEmpty(this.props.monitors)) {
+    //         let monitors = this.props.monitors;
+    //         console.log("Refreshing Stats - " + JSON.stringify(monitors));
+    //         setInterval(function(){
+    //             taskScheduler(monitors)
+    //         }, 10000);
+    //     }        
+    // }
 }
 
 Monitors.propTypes = {
     checkStatus: React.PropTypes.func.isRequired,
-    taskScheduler: React.PropTypes.func.isRequired,
+    // taskScheduler: React.PropTypes.func.isRequired,
     deleteMonitor: React.PropTypes.func.isRequired
 }
 

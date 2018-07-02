@@ -51,11 +51,10 @@ export function logError(errors) {
 };
 
 export function checkStatus(monitor) {
-    // console.log("Incoming Object : " + JSON.stringify(monitor));
-    // {"errors":{},"monitor":{"id":"ryTppFRmf","isActive":false,"url":"http://127.0.0.1/","name":"DEMO"}}
-    // console.log("Incoming Monitor Object - " + JSON.stringify(monitor));
+    console.log("Incoming Monitor Object - " + JSON.stringify(monitor));
     for (let index = 0; index < monitor.monitorList.length; index++) {
-        let monitorStatusObj = { 
+        console.log("Check Status For Loop - " + JSON.stringify(monitor.monitorList[index]));
+        let monitorStatusObj = {
             monitorList: [{
                 id: monitor.monitorList[index].id,
                 url: monitor.monitorList[index].url,
@@ -91,16 +90,16 @@ export function checkStatus(monitor) {
                         }
                         else {
                             // console.log("Success! - " + JSON.stringify(res.statusCode) + " " + JSON.stringify(res.statusMessage));
-                            let monitorObj = { 
-                                id: monitorStatusObj.monitorList[0].id, 
+                            let monitorObj = {
+                                id: monitorStatusObj.monitorList[0].id,
                                 isActive: true,
-                                name: monitorStatusObj.monitorList[0].name, 
+                                name: monitorStatusObj.monitorList[0].name,
                                 url: monitorStatusObj.monitorList[0].url
                             };
-                            monitor = { 
-                                ...monitorStatusObj, 
-                                monitorList: [ 
-                                    ...monitorStatusObj.monitorList[0], 
+                            monitor = {
+                                ...monitorStatusObj,
+                                monitorList: [
+                                    ...monitorStatusObj.monitorList[0],
                                     monitorObj
                                 ]
                             }
@@ -131,16 +130,17 @@ export function checkStatus(monitor) {
                 })
             }
         }
+
     }
 };
 
-export function taskScheduler(monitors) {
+// export function taskScheduler(monitors) {
 
-    console.log("Monitors Object - " + JSON.stringify(monitors) + " - " + monitors.monitorList.length);
-    if (!isEmpty(monitors)) {
-        if (monitors.monitorList.length > 0) {
-            console.log("Monitor List - " + JSON.stringify(monitors.monitorList));
-            checkStatus(monitors);
-        }
-    }
-}
+//     console.log("Monitors Object - " + JSON.stringify(monitors) + " - " + monitors.monitorList.length);
+//     if (!isEmpty(monitors)) {
+//         if (monitors.monitorList.length > 0) {
+//             console.log("Monitor List - " + JSON.stringify(monitors.monitorList));
+//             checkStatus(monitors);
+//         }
+//     }
+// }
